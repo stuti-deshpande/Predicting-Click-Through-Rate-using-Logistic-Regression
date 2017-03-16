@@ -1,0 +1,108 @@
+Pseudocode
+Task-1: Categorical Columns Vectorization
+
+
+Part1.py
+------------------------------
+
+# Load train.csv into current SparkContext
+train_data <-- sc.textFile (“/…input-path…./train.csv”)
+
+# Remove headers
+train_data <-- train_data.filter (header)
+
+# Split the data on “,” 
+ctr_split <-- train_data.split (",", -1))
+
+# Create RDD, exclude (id and attribute)
+ctr_tuples <-- ctr_split.map ( Rows [column1, coulmn2, ….] )
+
+# For selecting columns with distinct values
+
+Categories <-- new Dictionary
+idxCategories <-- List [indices of selected Columns]
+
+for each i in idxCategories
+    distinctValues <-- ctr_tuples.distinct().count()
+    categories[i] <-- distinctValues
+emit categories
+
+# Creating DataFrames with columns having numOfDistinctValues < 100
+schemaClick <-- sqlContext.createDataFrame (ctrTuples)
+
+# Convert column “click” from String to Double
+schemaClick.withColumn ("clickTmp",schemaClick.click.cast ('double'))
+           .drop ("click")
+           .withColumnRenamed ("clickTmp", "click")
+
+# Replace null values with NA in column C1
+schemaClick.na.replace ('-1', 'NA', 'C1')
+
+# Drop rows containing null values for numerical variables
+schemaClick.dropna()
+
+# Use StringIndexer and One-hot Encoder to convert categorical columns to numerical
+-------For C1
+C1Indexer <-- StringIndexer (inputCol="C1", outputCol="indexedC1", handleInvalid="skip")
+C1Encoder <-- OneHotEncoder (dropLast=False, inputCol="indexedC1", outputCol="VectorC1")
+---do for banner_pc, site_category, app_category, device_type, device_conn_type, C15, C16, C18, C19, C21
+
+# Use Vector Assembler to create Sparse Vectors for all categorical columns
+FeatureAssembler <-- VectorAssembler ( inputCols["column1", "column2", ...], 
+                                       outputCol = "VectoredFeatures")
+
+# Use Pipeline
+pipelineTmptmp <-- Pipeline (stages= [columnn[1,..n]Indexer, column[1,...n]Encoder, FeatureAssembler])
+modelTmp <-- pipelineTmp.fit(schemaClick)
+
+# Transform the dataset to contain the Vectored attributes
+tmp <-- modelTmp.transform(schemaClick)
+tmp <-- .select("click", "VectoredFeatures")
+tmp.registerTempTable("CLICK")
+
+# Use SparkSQLContext to select columns "click" and "VectoredFeatures"
+# Create DataFrames
+results <-- sqlContext.sql("SELECT click, VectoredFeatures from CLICK")
+
+# Creating label points
+click_transformed <-- results.select('click', 'VectoredFeatures')
+                             .rdd.map(lambda row --> LabeledPoint(float(row.click), Vectors.dense((row.VectoredFeatures).toArray())))
+
+# Split data into training and test sets
+weights <-- [.6, .4]
+seed <-- 42L
+
+ClickTrain, ClickTest <-- click_transformed.randomSplit(weights, seed)
+
+# Train the training data set for the Gradient Decent
+modelGD <-- LogisticRegressionWithSGD.train(ClickTrain, iterations <- 15, step <- 1, miniBatchFraction <- 1, regType <- None, validateData <- "False")
+
+# Test on the test Data set 
+# Do prediction on the label
+clickAndFeatures <-- ClickTest.map(lambda p--> (modelGD.predict(p.features)), p.label)
+
+#Calculating TruePositive(tp), TrueNegative(tn), FalsePositive(fp), FalseNegative(fn)
+# key (v,p) --> v is features and p is label
+
+tn <-- clickAndFeatures.filter(lambda (v,p)--> v==0.0 and p==0.0)
+fp <-- clickAndFeatures.filter(lambda (v,p)--> v==1.0 and p==0.0)
+
+#Area Under Curve
+metrics <-- BinaryClassificationMetrics(clickAndFeatures)
+emit metrics.areaUnderROC
+
+#Accuracy
+accuracy <-- clickAndFeatures.filter(lambda (v, p)--> v == p).count() / float(ClickTest.count())
+emit accuracy
+
+#False Positive rate
+fpr <-- float(fp.count())/(float(fp.count())+float(tn.count()))
+emit fpr)
+
+
+
+
+
+
+
+
