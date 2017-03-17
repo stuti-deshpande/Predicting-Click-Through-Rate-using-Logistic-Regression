@@ -1,5 +1,13 @@
 Name: Stuti Deshpande
-Gnumber: G00979218
+
+Using Logistic Regression to train the model with the training dataset:
+--Optimizing the parameters using Gradient Descent:
+Trained the model using LogisticRegressionWithSGD (from pyspark.mllib.classification) with train method by passing parameters as iterations=15, step=1, miniBatchFraction=1, regType=None, validateData="False". Recorded the time to run the Gradient Descent on training dataset which is 110.34 minutes.
+--Optimizing the parameters using Stochastic Gradient Descent:
+Trained the model using LogisticRegressionWithSGD ( from pyspark.mllib.classification) with train method by passing parameters as iterations=100, step=0.01, miniBatchFraction=0.01, regType=None, validateData="False". Recorded the time to run the Gradient Descent on training dataset which is 148.36 minutes.
+-- Obtained the graph of time to train vs. size of the training set to compare both methods, for the best optimized parameters thus obtained.
+--Using Logistic Regression with Stochastic Gradient Descent to perform testing on the test dataset.
+--Retraining the model using L2 Regularization along with the Stochastic Gradient Descent. accuracy raised up to 0.8341
 
 1. The submit folder has three subfolders: Code, Pseudocode and Output
 
