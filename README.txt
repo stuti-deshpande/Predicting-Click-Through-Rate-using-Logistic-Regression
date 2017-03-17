@@ -1,5 +1,6 @@
 Name: Stuti Deshpande
 
+Dataset Link:  https://www.kaggle.com/c/avazu-ctr-prediction/data  i.e. Kaggle CTR Prediction dataset.
 Using Logistic Regression to train the model with the training dataset:
 --Optimizing the parameters using Gradient Descent:
 Trained the model using LogisticRegressionWithSGD (from pyspark.mllib.classification) with train method by passing parameters as iterations=15, step=1, miniBatchFraction=1, regType=None, validateData="False". Recorded the time to run the Gradient Descent on training dataset which is 110.34 minutes.
